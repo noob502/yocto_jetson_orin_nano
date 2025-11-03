@@ -1,0 +1,20 @@
+[submodule "source/meta-tegra"]
+	path = source/meta-tegra
+	url = https://github.com/OE4T/meta-tegra
+	branch = mickledore
+[submodule "source/openembedded-core"]
+	path = source/openembedded-core
+	url = https://github.com/openembedded/openembedded-core.git
+	branch = mickledore
+[submodule "source/meta-openembedded"]
+	path = source/meta-openembedded
+	url = https://github.com/openembedded/meta-openembedded.git
+	branch = mickledore
+[submodule "source/meta-virtualization"]
+	path = source/meta-virtualization
+	url = https://github.com/lgirdk/meta-virtualization.git
+	branch = mickledore
+[submodule "source/bitbake"]
+	path = source/bitbake
+	url = https://github.com/openembedded/bitbake.git
+	branch = 2.8

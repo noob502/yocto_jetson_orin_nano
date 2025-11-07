@@ -1,0 +1,4 @@
+1. Apply custom gpio, pinmux, and padvoltage dtsi (find the best way: Do we need a custom machine config file and flashvars ?)
+2. Apply USB device tree overlay
+3. Apply Camera  (Vision component) driver, device tree, and patches
+4. Apply a custom User with root privilege with username and password

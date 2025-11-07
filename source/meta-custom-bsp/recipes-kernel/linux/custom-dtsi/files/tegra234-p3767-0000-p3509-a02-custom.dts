@@ -1,0 +1,7 @@
+/dts-v1/;
+
+#include "tegra234-p3767-0000-p3509-a02.dts"
+
+#include "Orin-custom_baseboard-pinmux.dtsi"
+#include "Orin-custom_baseboard-gpio-default.dtsi"
+#include "Orin-custom_baseboard--default.dtsi"

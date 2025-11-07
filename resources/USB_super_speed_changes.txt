@@ -1,0 +1,41 @@
+xusb_padctl@3520000/ports/
+
+			usb3-3 {
+				nvidia,usb2-companion = <0x01>;
+				status = "okay";
+			};
+
+			usb3-1 {
+				nvidia,usb2-companion = <0x01>;
+				status = "okay";
+			};
+
+
+xusb_padctl@3520000/ports/pads/usb3/lanes{
+{
+
+					usb3-2 {
+						nvidia,function = "xusb";
+						#phy-cells = <0x00>;
+						status = "okay";
+					};
+
+					usb3-0 {
+						nvidia,function = "xusb";
+						#phy-cells = <0x00>;
+						status = "okay";
+						phandle = <0x2ba>;
+					};
+
+					usb3-3 {
+						nvidia,function = "xusb";
+						#phy-cells = <0x00>;
+						status = "okay";
+					};
+
+					usb3-1 {
+						nvidia,function = "xusb";
+						#phy-cells = <0x00>;
+						status = "okay";
+					};
+				};

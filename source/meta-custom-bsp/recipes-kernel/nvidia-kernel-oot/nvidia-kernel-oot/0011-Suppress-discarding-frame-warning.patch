@@ -1,0 +1,35 @@
+From 3817da6897f294381d8d03ae27abf5c82a310098 Mon Sep 17 00:00:00 2001
+From: "/setup.sh" <support@vision-components.com>
+Date: Mon, 3 Feb 2025 12:42:37 +0100
+Subject: [PATCH 11/13] Suppress discarding frame warning.
+
+Upstream-Status: Inappropriate [OE Specific]
+
+---
+ .../drivers/media/platform/tegra/camera/vi/vi5_fops.c  | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/nvidia-oot/drivers/media/platform/tegra/camera/vi/vi5_fops.c b/nvidia-oot/drivers/media/platform/tegra/camera/vi/vi5_fops.c
+index 6b943a5..c7926ce 100644
+--- a/nvidia-oot/drivers/media/platform/tegra/camera/vi/vi5_fops.c
++++ b/nvidia-oot/drivers/media/platform/tegra/camera/vi/vi5_fops.c
+@@ -552,11 +552,11 @@ static void vi5_capture_dequeue(struct tegra_channel *chan,
+ 				dev_err(vi->dev, "uncorr_err: flags %d, err_data %d\n",
+ 					descr->status.flags, descr->status.err_data);
+ 			} else {
+-				dev_warn(vi->dev,
+-					"corr_err: discarding frame %d, flags: %d, "
+-					"err_data %d\n",
+-					descr->status.frame_id, descr->status.flags,
+-					descr->status.err_data);
++//				dev_warn(vi->dev,
++//					"corr_err: discarding frame %d, flags: %d, "
++//					"err_data %d\n",
++//					descr->status.frame_id, descr->status.flags,
++//					descr->status.err_data);
+ 				frame_err = true;
+ 			}
+ 		} else if (!vi_port) {
+-- 
+2.43.0
+

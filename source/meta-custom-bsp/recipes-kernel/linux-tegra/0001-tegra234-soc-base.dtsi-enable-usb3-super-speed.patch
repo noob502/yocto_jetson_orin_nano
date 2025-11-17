@@ -1,0 +1,65 @@
+From 5516752c0e47dfa44d5bbe91001c14498e6ed522 Mon Sep 17 00:00:00 2001
+From: Ming Liu <liu.ming50@gmail.com>
+Date: Mon, 17 Nov 2025 12:56:55 +0100
+Subject: [PATCH] tegra234-soc-base.dtsi: enable usb3 super speed
+
+Signed-off-by: Ming Liu <liu.ming50@gmail.com>
+---
+ .../tegra234-soc/tegra234-soc-base.dtsi       | 19 +++++++++++++------
+ 1 file changed, 13 insertions(+), 6 deletions(-)
+
+diff --git a/nvidia/soc/t23x/kernel-dts/tegra234-soc/tegra234-soc-base.dtsi b/nvidia/soc/t23x/kernel-dts/tegra234-soc/tegra234-soc-base.dtsi
+index a75234b8b9a2..79e7c1896a2c 100644
+--- a/nvidia/soc/t23x/kernel-dts/tegra234-soc/tegra234-soc-base.dtsi
++++ b/nvidia/soc/t23x/kernel-dts/tegra234-soc/tegra234-soc-base.dtsi
+@@ -598,20 +598,25 @@ usb2-3 {
+ 			usb3 {
+ 				lanes {
+ 					usb3-0 {
+-						status = "disabled";
++						nvidia,function = "xusb";
+ 						#phy-cells = <0>;
++						status = "okay";
++						phandle = <0x2ba>;
+ 					};
+ 					usb3-1 {
+-						status = "disabled";
++						nvidia,function = "xusb";
+ 						#phy-cells = <0>;
++						status = "okay";
+ 					};
+ 					usb3-2 {
+-						status = "disabled";
++						nvidia,function = "xusb";
+ 						#phy-cells = <0>;
++						status = "okay";
+ 					};
+ 					usb3-3 {
+-						status = "disabled";
++						nvidia,function = "xusb";
+ 						#phy-cells = <0>;
++						status = "okay";
+ 					};
+ 				};
+ 			};
+@@ -634,13 +639,15 @@ usb3-0 {
+ 				status = "disabled";
+ 			};
+ 			usb3-1 {
+-				status = "disabled";
++				nvidia,usb2-companion = <0x01>;
++				status = "okay";
+ 			};
+ 			usb3-2 {
+ 				status = "disabled";
+ 			};
+ 			usb3-3 {
+-				status = "disabled";
++				nvidia,usb2-companion = <0x01>;
++				status = "okay";
+ 			};
+ 		};
+ 	};
+-- 
+2.43.0
+

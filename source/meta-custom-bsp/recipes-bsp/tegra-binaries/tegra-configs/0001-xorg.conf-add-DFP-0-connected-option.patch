@@ -1,0 +1,27 @@
+From bcbae5c5bfe37b8807dc636672d814e8e283f83c Mon Sep 17 00:00:00 2001
+From: Ming Liu <liu.ming50@gmail.com>
+Date: Sun, 25 Feb 2024 20:50:19 +0100
+Subject: [PATCH] xorg.conf: add DFP-0 connected option
+
+Upstream-Status: Inappropriate [OE specific]
+
+Signed-off-by: Ming Liu <liu.ming50@gmail.com>
+---
+ etc/X11/xorg.conf | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/etc/X11/xorg.conf b/etc/X11/xorg.conf
+index 5d76ca2..d586791 100644
+--- a/etc/X11/xorg.conf
++++ b/etc/X11/xorg.conf
+@@ -18,6 +18,7 @@ Section "Device"
+     Identifier  "Tegra0"
+     Driver      "nvidia"
+ # Allow X server to be started even if no display devices are connected.
++    Option      "ConnectedMonitor" "DFP-0"
+     Option      "AllowEmptyInitialConfiguration" "true"
+ EndSection
+ 
+-- 
+2.34.1
+

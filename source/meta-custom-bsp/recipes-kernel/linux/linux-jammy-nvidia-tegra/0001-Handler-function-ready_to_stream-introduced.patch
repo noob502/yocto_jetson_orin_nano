@@ -1,0 +1,62 @@
+From 49027dff4d3cb4940e67e49110fcd355b0c34067 Mon Sep 17 00:00:00 2001
+From: "/setup.sh" <support@vision-components.com>
+Date: Wed, 28 May 2025 14:02:25 +0200
+Subject: [PATCH] Handler function ready_to_stream introduced.
+
+Upstream-Status: Inappropriate [OE-specific]
+
+---
+ .../media/common/videobuf2/videobuf2-v4l2.c   |  3 +-
+ .../include/media/v4l2-subdev.h               |  1 +
+ .../include/media/videobuf2-v4l2.h            |  1 +
+ .../platform/tegra/camera/tegracam_v4l2.c     | 37 ++++++++++++++++++
+ .../media/platform/tegra/camera/vi/channel.c  | 39 ++++++++++++++++++-
+ .../media/platform/tegra/camera/vi/vi5_fops.c | 16 ++++++++
+ nvidia-oot/include/media/camera_common.h      |  1 +
+ nvidia-oot/include/media/mc_common.h          |  1 +
+ 8 files changed, 97 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/media/common/videobuf2/videobuf2-v4l2.c b/drivers/media/common/videobuf2/videobuf2-v4l2.c
+index 2988bb3..9d92b96 100644
+--- a/drivers/media/common/videobuf2/videobuf2-v4l2.c
++++ b/drivers/media/common/videobuf2/videobuf2-v4l2.c
+@@ -981,10 +981,11 @@ EXPORT_SYMBOL_GPL(vb2_poll);
+  */
+ 
+ /* The queue is busy if there is a owner and you are not that owner. */
+-static inline bool vb2_queue_is_busy(struct video_device *vdev, struct file *file)
++bool vb2_queue_is_busy(struct video_device *vdev, struct file *file)
+ {
+ 	return vdev->queue->owner && vdev->queue->owner != file->private_data;
+ }
++EXPORT_SYMBOL_GPL(vb2_queue_is_busy);
+ 
+ /* vb2 ioctl helpers */
+ 
+diff --git a/include/media/v4l2-subdev.h b/include/media/v4l2-subdev.h
+index c627570..ef89c12 100644
+--- a/include/media/v4l2-subdev.h
++++ b/include/media/v4l2-subdev.h
+@@ -471,6 +471,7 @@ struct v4l2_subdev_video_ops {
+ 			   unsigned int *size);
+ 	int (*pre_streamon)(struct v4l2_subdev *sd, u32 flags);
+ 	int (*post_streamoff)(struct v4l2_subdev *sd);
++	int (*g_ready_to_stream)(struct v4l2_subdev *sd);
+ };
+ 
+ /**
+diff --git a/include/media/videobuf2-v4l2.h b/include/media/videobuf2-v4l2.h
+index b66585e..813c8b8 100644
+--- a/include/media/videobuf2-v4l2.h
++++ b/include/media/videobuf2-v4l2.h
+@@ -307,6 +307,7 @@ __poll_t vb2_poll(struct vb2_queue *q, struct file *file, poll_table *wait);
+  */
+ 
+ /* struct v4l2_ioctl_ops helpers */
++bool vb2_queue_is_busy(struct video_device *vdev, struct file *file);
+ 
+ int vb2_ioctl_reqbufs(struct file *file, void *priv,
+ 			  struct v4l2_requestbuffers *p);
+-- 
+2.34.1
+

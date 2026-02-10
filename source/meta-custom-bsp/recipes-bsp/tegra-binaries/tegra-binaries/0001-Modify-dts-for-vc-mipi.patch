@@ -1,0 +1,41 @@
+From f797cc3e72720597100809aa7a52a206d6be50eb Mon Sep 17 00:00:00 2001
+From: Ming Liu <liu.ming50@gmail.com>
+Date: Tue, 10 Feb 2026 17:56:30 +0100
+Subject: [PATCH] Modify dts for vc mipi
+
+Upstream-Status: Inappropriate [OE-Specific]
+
+Signed-off-by: Ming Liu <liu.ming50@gmail.com>
+---
+ bootloader/generic/BCT/tegra234-mb2-bct-scr-p3767-0000.dts | 5 -----
+ p3768-0000-p3767-0000-a0.conf                              | 1 +
+ 2 files changed, 1 insertion(+), 5 deletions(-)
+
+diff --git a/bootloader/generic/BCT/tegra234-mb2-bct-scr-p3767-0000.dts b/bootloader/generic/BCT/tegra234-mb2-bct-scr-p3767-0000.dts
+index 9145f54..0102a28 100644
+--- a/bootloader/generic/BCT/tegra234-mb2-bct-scr-p3767-0000.dts
++++ b/bootloader/generic/BCT/tegra234-mb2-bct-scr-p3767-0000.dts
+@@ -6,11 +6,6 @@
+ / {
+     tfc {
+ 
+-	reg@322 { /* GPIO_CTL, GPIO_M_SCR_00_0 */
+-	    exclusion-info = <2>;
+-	    value = <0x38009494>;
+-	};
+-
+         reg@5138 { /* CBB_CENTRAL_CBB_FIREWALL_QSPI0_BLF, READ_CTL */
+             exclusion-info = <2>;
+             value = <0x00100009>;
+diff --git a/p3768-0000-p3767-0000-a0.conf b/p3768-0000-p3767-0000-a0.conf
+index d60c850..42f7b7e 100644
+--- a/p3768-0000-p3767-0000-a0.conf
++++ b/p3768-0000-p3767-0000-a0.conf
+@@ -116,3 +116,4 @@ elif [[ "${ROOTFS_AB}" == "" && "${ROOTFS_ENC}" == 1 ]]; then
+ elif [[ "${ROOTFS_AB}" == 1 && "${ROOTFS_ENC}" == 1 ]]; then
+ 	EMMC_CFG=flash_t234_qspi_sd_enc_rootfs_ab.xml;
+ fi;
++OVERLAY_DTB_FILE="${OVERLAY_DTB_FILE},tegra234-p3767-camera-p3768-vc_mipi-dual.dtbo";
+-- 
+2.43.0
+

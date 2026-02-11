@@ -15,4 +15,5 @@ SRC_URI:append = " \
     file://0010-Suppress-discarding-frame-warning.patch \
     file://0011-Add-vc_mipi-driver-and-dts.patch \
     file://0012-Handler-function-ready_to_stream-introduced.patch \
+    file://0013-tegra234-p3768-usb3-superspeed-lanes-add-dts.patch \
 "

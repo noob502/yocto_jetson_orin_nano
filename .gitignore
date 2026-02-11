@@ -1,1 +1,6 @@
 build/
+source/bitbake
+source/meta-openembedded
+source/meta-tegra
+source/openembedded-core
+source/openembedded-core/bitbake

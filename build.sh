@@ -1,10 +1,24 @@
 #!/bin/bash
 
-BASE_DIR=$(pwd)
-BUILD_DIR="${BASE_DIR}/build"
-DEPLOY_DIR="${BASE_DIR}/image"
+#
+# Normally this is called as '. ./ale-init-build-env builddir'
+#
+# This works in most shells (not dash), but not all of them pass arg1 when
+# being sourced. To workaround the shell limitation use "set arg1" prior
+# to sourcing this script.
+#
+if [ -n "$BASH_SOURCE" ]; then
+   THIS_SCRIPT_DIR="$(readlink -f $(dirname $BASH_SOURCE))"
+elif [ -n "$ZSH_NAME" ]; then
+   THIS_SCRIPT_DIR="$(readlink -f $(dirname $0))"
+else
+   THIS_SCRIPT_DIR="$(pwd)"
+fi
 
-source sources/openembedded-core/oe-init-build-env $BUILD_DIR
+BUILD_DIR="${THIS_SCRIPT_DIR}/build"
+DEPLOY_DIR="${THIS_SCRIPT_DIR}/image"
+
+source source/openembedded-core/oe-init-build-env $BUILD_DIR
 
 LOCAL_CONF_CONTENT='
 PACKAGE_CLASSES ?= "package_ipk"
@@ -40,7 +54,7 @@ IMAGE_FEATURES:append = " ssh-server-openssh"
 IMAGE_INSTALL:append = " openssh openssh-sshd"
 IMAGE_INSTALL:append = " pciutils ethtool iproute2 iputils linux-firmware dhcpcd"
 
-TEGRA_PLUGIN_MANAGER_OVERLAYS += "tegra234-p3767-camera-p3768-vc_mipi-dual.dtbo"
+TEGRA_PLUGIN_MANAGER_OVERLAYS += "tegra234-p3767-camera-p3768-vc_mipi-dual.dtbo tegra234-p3768-usb3-superspeed-lanes.dtbo"
 
 BB_NUMBER_THREADS = "4"
 PARALLEL_MAKE = "-j4"
@@ -57,16 +71,16 @@ BBPATH = "${TOPDIR}"
 BBFILES ?= ""
 
 BBLAYERS ?= " \
-  ${TOPDIR}/../sources/meta-tegra \
-  ${TOPDIR}/../sources/openembedded-core/meta \
-  ${TOPDIR}/../sources/meta-openembedded/meta-oe \
-  ${TOPDIR}/../sources/meta-openembedded/meta-python \
-  ${TOPDIR}/../sources/meta-openembedded/meta-networking \
-  ${TOPDIR}/../sources/meta-openembedded/meta-filesystems \
-  ${TOPDIR}/../sources/meta-custom-bsp \
+  ${TOPDIR}/../source/meta-tegra \
+  ${TOPDIR}/../source/openembedded-core/meta \
+  ${TOPDIR}/../source/meta-openembedded/meta-oe \
+  ${TOPDIR}/../source/meta-openembedded/meta-python \
+  ${TOPDIR}/../source/meta-openembedded/meta-networking \
+  ${TOPDIR}/../source/meta-openembedded/meta-filesystems \
+  ${TOPDIR}/../source/meta-custom-bsp \
 "
 '
 echo "${LOCAL_CONF_CONTENT}" > "${BUILD_DIR}/conf/local.conf"
 echo "${BBLAYERS_CONF_CONTENT}" > "${BUILD_DIR}/conf/bblayers.conf"
 
-bitbake core-image-full-cmdline 
+bitbake core-image-full-cmdline

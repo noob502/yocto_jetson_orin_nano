@@ -1,77 +1,70 @@
-From cfa11756fd9373a35024b54efe55bf76f67e09fe Mon Sep 17 00:00:00 2001
+From 99f6f5f346b2f8d48f70effb46ca8e936d9b9ffb Mon Sep 17 00:00:00 2001
 From: Ming Liu <liu.ming50@gmail.com>
-Date: Wed, 11 Feb 2026 10:13:33 +0100
-Subject: [PATCH] tegra234-p3768-usb3-superspeed-lanes: add dts
+Date: Sun, 16 Nov 2025 11:59:46 +0100
+Subject: [PATCH] tegra234.dtsi: enable usb3 super speed
 
-Upstream-Status: Inappropriate [embedded specific]
+Upstream-Status: Inappropriate [OE specific]
 
 Signed-off-by: Ming Liu <liu.ming50@gmail.com>
 ---
- .../nvidia/t23x/nv-public/overlay/Makefile    |  1 +
- .../tegra234-p3768-usb3-superspeed-lanes.dts  | 42 +++++++++++++++++++
- 2 files changed, 43 insertions(+)
- create mode 100644 hardware/nvidia/t23x/nv-public/overlay/tegra234-p3768-usb3-superspeed-lanes.dts
+ hardware/nvidia/t23x/nv-public/tegra234.dtsi | 15 +++++++++------
+ 1 file changed, 9 insertions(+), 6 deletions(-)
 
-diff --git a/hardware/nvidia/t23x/nv-public/overlay/Makefile b/hardware/nvidia/t23x/nv-public/overlay/Makefile
-index 6116b15..5c79916 100644
---- a/hardware/nvidia/t23x/nv-public/overlay/Makefile
-+++ b/hardware/nvidia/t23x/nv-public/overlay/Makefile
-@@ -66,6 +66,7 @@ dtbo-y += tegra234-p3767-camera-p3768-imx219-A.dtbo
- dtbo-y += tegra234-p3767-camera-p3768-imx219-imx477.dtbo
- dtbo-y += tegra234-p3767-camera-p3768-imx477-C.dtbo
- dtbo-y += tegra234-p3767-camera-p3768-imx477-A.dtbo
-+dtbo-y += tegra234-p3768-usb3-superspeed-lanes.dtbo
+diff --git a/hardware/nvidia/t23x/nv-public/tegra234.dtsi b/hardware/nvidia/t23x/nv-public/tegra234.dtsi
+index 91474c5..86cc735 100644
+--- a/hardware/nvidia/t23x/nv-public/tegra234.dtsi
++++ b/hardware/nvidia/t23x/nv-public/tegra234.dtsi
+@@ -3162,25 +3162,26 @@
+ 					lanes {
+ 						usb3-0 {
+ 							nvidia,function = "xusb";
+-							status = "disabled";
++							status = "okay";
+ 							#phy-cells = <0>;
++							phandle = <0x2ba>;
+ 						};
  
- ifneq ($(dtb-y),)
- dtb-y := $(addprefix $(makefile-path)/,$(dtb-y))
-diff --git a/hardware/nvidia/t23x/nv-public/overlay/tegra234-p3768-usb3-superspeed-lanes.dts b/hardware/nvidia/t23x/nv-public/overlay/tegra234-p3768-usb3-superspeed-lanes.dts
-new file mode 100644
-index 0000000..183ecf7
---- /dev/null
-+++ b/hardware/nvidia/t23x/nv-public/overlay/tegra234-p3768-usb3-superspeed-lanes.dts
-@@ -0,0 +1,42 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+// SPDX-FileCopyrightText: Copyright (c) 2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-+
-+/dts-v1/;
-+/plugin/;
-+
-+#include <dt-bindings/tegra234-p3767-0000-common.h>
-+
-+/ {
-+    overlay-name = "Enable SuperSpeed USB3 Lanes Overlay";
-+    compatible = JETSON_COMPATIBLE_P3768;
-+
-+    fragment@0 {
-+        target-path = "/bus@0/padctl@3520000/pads/usb3/lanes";
-+        __overlay__ {
-+            usb3-0 {
-+                status = "okay";
-+            };
-+            usb3-1 {
-+                status = "okay";
-+            };
-+            usb3-2 {
-+                status = "okay";
-+            };
-+            usb3-3 {
-+                status = "okay";
-+            };
-+        };
-+    };
-+
-+    fragment@1 {
-+        target-path = "/bus@0/padctl@3520000/ports";
-+        __overlay__ {
-+            usb3-1 {
-+                status = "okay";
-+            };
-+            usb3-3 {
-+                status = "okay";
-+            };
-+        };
-+    };
-+};
+ 						usb3-1 {
+ 							nvidia,function = "xusb";
+-							status = "disabled";
++							status = "okay";
+ 							#phy-cells = <0>;
+ 						};
+ 
+ 						usb3-2 {
+ 							nvidia,function = "xusb";
+-							status = "disabled";
++							status = "okay";
+ 							#phy-cells = <0>;
+ 						};
+ 
+ 						usb3-3 {
+ 							nvidia,function = "xusb";
+-							status = "disabled";
++							status = "okay";
+ 							#phy-cells = <0>;
+ 						};
+ 					};
+@@ -3209,7 +3210,8 @@
+ 				};
+ 
+ 				usb3-1 {
+-					status = "disabled";
++					nvidia,usb2-companion = <0x01>;
++					status = "okay";
+ 				};
+ 
+ 				usb3-2 {
+@@ -3217,7 +3219,8 @@
+ 				};
+ 
+ 				usb3-3 {
+-					status = "disabled";
++					nvidia,usb2-companion = <0x01>;
++					status = "okay";
+ 				};
+ 			};
+ 		};
 -- 
 2.43.0
 

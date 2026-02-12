@@ -54,7 +54,7 @@ IMAGE_FEATURES:append = " ssh-server-openssh"
 IMAGE_INSTALL:append = " openssh openssh-sshd"
 IMAGE_INSTALL:append = " pciutils ethtool iproute2 iputils linux-firmware dhcpcd"
 
-TEGRA_PLUGIN_MANAGER_OVERLAYS += "tegra234-p3767-camera-p3768-vc_mipi-dual.dtbo tegra234-p3768-usb3-superspeed-lanes.dtbo"
+TEGRA_PLUGIN_MANAGER_OVERLAYS:append = "tegra234-p3767-camera-p3768-vc_mipi-dual.dtbo tegra234-p3768-usb3-superspeed-lanes.dtbo"
 
 BB_NUMBER_THREADS = "4"
 PARALLEL_MAKE = "-j4"

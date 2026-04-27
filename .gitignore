@@ -4,3 +4,5 @@ source/meta-openembedded
 source/meta-tegra
 source/openembedded-core
 source/openembedded-core/bitbake
+*.deb
+source/meta-os/recipes-support/lft-minimal/files/Linux_for_Tegra/

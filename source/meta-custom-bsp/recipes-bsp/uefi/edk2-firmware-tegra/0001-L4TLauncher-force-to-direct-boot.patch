@@ -1,0 +1,251 @@
+From 3f7a93238dadb4e8e06770c3bcdeb24e99a7086a Mon Sep 17 00:00:00 2001
+From: Ming Liu <liu.ming50@gmail.com>
+Date: Tue, 16 Sep 2025 10:31:54 +0200
+Subject: [PATCH] L4TLauncher: force to direct boot
+
+Upstream-Status: Inappropriate [Noob specific]
+
+Signed-off-by: Ming Liu <liu.ming50@gmail.com>
+---
+ .../Application/L4TLauncher/L4TLauncher.c     | 194 +-----------------
+ .../Application/L4TLauncher/L4TOpteeDecrypt.c |   2 +-
+ 2 files changed, 3 insertions(+), 193 deletions(-)
+
+diff --git a/Silicon/NVIDIA/Application/L4TLauncher/L4TLauncher.c b/Silicon/NVIDIA/Application/L4TLauncher/L4TLauncher.c
+index 6ce65ea8..0b27512c 100644
+--- a/Silicon/NVIDIA/Application/L4TLauncher/L4TLauncher.c
++++ b/Silicon/NVIDIA/Application/L4TLauncher/L4TLauncher.c
+@@ -349,155 +349,6 @@ FindPartitionInfo (
+   return EFI_SUCCESS;
+ }
+ 
+-/**
+-  Update the grub boot configuration file
+-
+-  @param[in]  DeviceHandle     The handle of partition where this file lives on.
+-  @param[in]  PartitionIndex   Partition number of the root file system
+-  @param[in]  BootImgPresent   BootImage is present on system
+-  @param[in]  RecoveryPresent  Recovery kernel partition is present on system
+-
+-  @retval EFI_SUCCESS    The operation completed successfully.
+-
+-**/
+-STATIC
+-EFI_STATUS
+-EFIAPI
+-UpdateBootCfgFile (
+-  IN EFI_HANDLE  DeviceHandle,
+-  IN UINT32      PartitionIndex,
+-  IN BOOLEAN     BootImgPresent,
+-  IN BOOLEAN     RecoveryPresent
+-  )
+-{
+-  EFI_STATUS                Status;
+-  CHAR8                     CorrectPartitionContent[MAX_BOOTCONFIG_CONTENT_SIZE];
+-  CHAR8                     ReadPartitionContent[MAX_BOOTCONFIG_CONTENT_SIZE];
+-  CHAR16                    CpuBootArgs[MAX_CBOOTARG_SIZE/sizeof (CHAR16)];
+-  UINTN                     CorrectSize;
+-  UINT64                    FileSize;
+-  EFI_FILE_HANDLE           FileHandle;
+-  EFI_DEVICE_PATH           *FullDevicePath;
+-  ANDROID_BOOTIMG_PROTOCOL  *AndroidBootProtocol;
+-
+-  ZeroMem (CpuBootArgs, MAX_CBOOTARG_SIZE);
+-  Status = gBS->LocateProtocol (&gAndroidBootImgProtocolGuid, NULL, (VOID **)&AndroidBootProtocol);
+-  if (!EFI_ERROR (Status)) {
+-    if (AndroidBootProtocol->AppendArgs != NULL) {
+-      Status = AndroidBootProtocol->AppendArgs (CpuBootArgs, MAX_CBOOTARG_SIZE);
+-      if (EFI_ERROR (Status)) {
+-        ErrorPrint (L"%a: Failed to get platform addition arguments\r\n", __FUNCTION__);
+-        return Status;
+-      }
+-    }
+-  }
+-
+-  CorrectSize = AsciiSPrint (CorrectPartitionContent, MAX_BOOTCONFIG_CONTENT_SIZE, GRUB_BOOTCONFIG_CONTENT_FORMAT, CpuBootArgs, PartitionIndex, BootImgPresent, RecoveryPresent);
+-
+-  FullDevicePath = FileDevicePath (DeviceHandle, GRUB_BOOTCONFIG_FILE);
+-  if (FullDevicePath == NULL) {
+-    ErrorPrint (L"%a: Failed to create file device path\r\n", __FUNCTION__);
+-    return EFI_OUT_OF_RESOURCES;
+-  }
+-
+-  Status = EfiOpenFileByDevicePath (&FullDevicePath, &FileHandle, EFI_FILE_MODE_READ|EFI_FILE_MODE_WRITE|EFI_FILE_MODE_CREATE, 0);
+-  if (EFI_ERROR (Status)) {
+-    ErrorPrint (L"%a: Failed to open file: %r\r\n", __FUNCTION__, Status);
+-    return Status;
+-  }
+-
+-  Status = FileHandleGetSize (FileHandle, &FileSize);
+-  if (EFI_ERROR (Status)) {
+-    ErrorPrint (L"%a: Failed to get file size: %r\r\n", __FUNCTION__, Status);
+-    return Status;
+-  }
+-
+-  if (FileSize == CorrectSize) {
+-    ASSERT (FileSize <= MAX_BOOTCONFIG_CONTENT_SIZE);
+-    Status = FileHandleRead (FileHandle, &FileSize, ReadPartitionContent);
+-    if (EFI_ERROR (Status)) {
+-      ErrorPrint (L"%a: Failed to read current file content: %r\r\n", __FUNCTION__, Status);
+-      return Status;
+-    }
+-
+-    if (CompareMem (CorrectPartitionContent, ReadPartitionContent, CorrectSize) == 0) {
+-      return EFI_SUCCESS;
+-    }
+-  }
+-
+-  Status = FileHandleSetSize (FileHandle, 0);
+-  if (EFI_ERROR (Status)) {
+-    ErrorPrint (L"%a: Failed to set file size to 0\r\n", __FUNCTION__);
+-    return Status;
+-  }
+-
+-  Status = FileHandleWrite (FileHandle, &CorrectSize, CorrectPartitionContent);
+-  if (EFI_ERROR (Status)) {
+-    ErrorPrint (L"%a: Failed to write file content\r\n", __FUNCTION__);
+-    return Status;
+-  }
+-
+-  FileHandleClose (FileHandle);
+-  return EFI_SUCCESS;
+-}
+-
+-/**
+-  Update the grub partition configuration files
+-
+-  @param[in]  DeviceHandle     The handle of partition where this file lives on.
+-  @param[in]  BootChain        Numeric version of the chain
+-
+-  @retval EFI_SUCCESS    The operation completed successfully.
+-
+-**/
+-STATIC
+-EFI_STATUS
+-EFIAPI
+-UpdateBootConfig (
+-  IN EFI_HANDLE  DeviceHandle,
+-  IN UINT32      BootChain
+-  )
+-{
+-  UINT32      PartitionIndex;
+-  EFI_STATUS  Status;
+-  BOOLEAN     BootImgPresent  = FALSE;
+-  BOOLEAN     RecoveryPresent = FALSE;
+-
+-  Status = FindPartitionInfo (DeviceHandle, ROOTFS_BASE_NAME, BootChain, &PartitionIndex, NULL);
+-  if (EFI_ERROR (Status)) {
+-    ErrorPrint (L"%a: Unable to find rootfs partition info\r\n", __FUNCTION__);
+-    return Status;
+-  }
+-
+-  Status = FindPartitionInfo (DeviceHandle, BOOTIMG_BASE_NAME, BootChain, NULL, NULL);
+-  if (Status == EFI_SUCCESS) {
+-    BootImgPresent = TRUE;
+-  } else if (Status == EFI_NOT_FOUND) {
+-    BootImgPresent = FALSE;
+-  } else if (EFI_ERROR (Status)) {
+-    ErrorPrint (L"%a: Unable to find bootimg partition info\r\n", __FUNCTION__);
+-    return Status;
+-  }
+-
+-  Status = FindPartitionInfo (DeviceHandle, RECOVERY_BASE_NAME, BootChain, NULL, NULL);
+-  if (Status == EFI_SUCCESS) {
+-    RecoveryPresent = TRUE;
+-  } else if (Status == EFI_NOT_FOUND) {
+-    RecoveryPresent = FALSE;
+-  } else if (EFI_ERROR (Status)) {
+-    ErrorPrint (L"%a: Unable to find recovery partition info\r\n", __FUNCTION__);
+-    return Status;
+-  }
+-
+-  Status = UpdateBootCfgFile (DeviceHandle, PartitionIndex, BootImgPresent, RecoveryPresent);
+-  if (EFI_ERROR (Status)) {
+-    ErrorPrint (L"Unable to update boot configuration file\r\n");
+-    return Status;
+-  }
+-
+-  return Status;
+-}
+-
+ /**
+   Remove comments and leading trailing whitespace
+ 
+@@ -2530,11 +2381,9 @@ L4TLauncher (
+   IN EFI_SYSTEM_TABLE  *SystemTable
+   )
+ {
+-  EFI_DEVICE_PATH               *FullDevicePath;
+   EFI_LOADED_IMAGE_PROTOCOL     *LoadedImage;
+   EFI_STATUS                    Status;
+   TEGRA_BOOT_MODE_METADATA      BootModeMetaData;
+-  EFI_HANDLE                    LoadedImageHandle  = 0;
+   EFI_HANDLE                    RootFsDeviceHandle = 0;
+   EFI_HANDLE                    DeviceHandle       = 0;
+   L4T_BOOT_PARAMS               BootParams;
+@@ -2604,47 +2453,8 @@ L4TLauncher (
+       ErrorPrint (L"Failed to boot image: %r\r\n", Status);
+     }
+   } else {
+-    if (BootParams.BootMode == NVIDIA_L4T_BOOTMODE_GRUB) {
+-      ErrorPrint (L"%a: Attempting GRUB Boot\r\n", __FUNCTION__);
+-      do {
+-        FullDevicePath = FileDevicePath (DeviceHandle, GRUB_PATH);
+-        if (FullDevicePath == NULL) {
+-          ErrorPrint (L"%a: Failed to create full device path\r\n", __FUNCTION__);
+-          BootParams.BootMode = NVIDIA_L4T_BOOTMODE_DIRECT;
+-          break;
+-        }
+-
+-        Status = gBS->LoadImage (FALSE, ImageHandle, FullDevicePath, NULL, 0, &LoadedImageHandle);
+-        if (EFI_ERROR (Status)) {
+-          if (Status != EFI_NOT_FOUND) {
+-            ErrorPrint (L"%a: Unable to load image: %r\r\n", __FUNCTION__, Status);
+-          }
+-
+-          BootParams.BootMode = NVIDIA_L4T_BOOTMODE_DIRECT;
+-          break;
+-        }
+-
+-        Status = UpdateBootConfig (DeviceHandle, BootParams.BootChain);
+-        if (EFI_ERROR (Status)) {
+-          ErrorPrint (L"%a: Unable to update partition files\r\n", __FUNCTION__);
+-          BootParams.BootMode = NVIDIA_L4T_BOOTMODE_DIRECT;
+-          break;
+-        }
+-
+-        // Before calling the image, enable the Watchdog Timer for  the 5 Minute period
+-        gBS->SetWatchdogTimer (5 * 60, 0x10000, 0, NULL);
+-
+-        Status = gBS->StartImage (LoadedImageHandle, NULL, NULL);
+-
+-        // Clear the Watchdog Timer if the image returns
+-        gBS->SetWatchdogTimer (0, 0x10000, 0, NULL);
+-
+-        if (EFI_ERROR (Status)) {
+-          ErrorPrint (L"%a: Unable to start image: %r\r\n", __FUNCTION__, Status);
+-          break;
+-        }
+-      } while (FALSE);
+-    }
++    /* Force to NVIDIA_L4T_BOOTMODE_DIRECT */
++    BootParams.BootMode = NVIDIA_L4T_BOOTMODE_DIRECT;
+ 
+     if (BootParams.BootMode == NVIDIA_L4T_BOOTMODE_DIRECT) {
+       ErrorPrint (L"%a: Attempting Direct Boot\r\n", __FUNCTION__);
+diff --git a/Silicon/NVIDIA/Application/L4TLauncher/L4TOpteeDecrypt.c b/Silicon/NVIDIA/Application/L4TLauncher/L4TOpteeDecrypt.c
+index e6944b82..a430ff94 100644
+--- a/Silicon/NVIDIA/Application/L4TLauncher/L4TOpteeDecrypt.c
++++ b/Silicon/NVIDIA/Application/L4TLauncher/L4TOpteeDecrypt.c
+@@ -189,7 +189,7 @@ GetImageEncryptionInfo (
+   Info->ImageLengthOffset = 0;
+ 
+   if (MessageArg->Params[1].Union.Value.A == 1) {
+-    Info->ImageEncrypted = TRUE;
++    Info->ImageEncrypted = FALSE;
+ 
+     if (gL4TSupportProtocol != NULL) {
+       Status = gL4TSupportProtocol->GetBootComponentHeaderSize (&HeaderSize);
+-- 
+2.43.0
+

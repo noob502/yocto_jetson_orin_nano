@@ -59,6 +59,9 @@ TEGRA_PLUGIN_MANAGER_OVERLAYS:append = " tegra234-p3767-camera-p3768-vc_mipi-dua
 BB_NUMBER_THREADS = "4"
 PARALLEL_MAKE = "-j4"
 
+TEGRA_UEFI_DB_KEY = "${CUSTOM_COREBASE}/files/uefi-keys/db.key"
+TEGRA_UEFI_DB_CERT = "${CUSTOM_COREBASE}/files/uefi-keys/db.crt"
+
 DEPLOY_DIR_IMAGE = "${TOPDIR}/image/"
 
 BBDEBUG = "yes"

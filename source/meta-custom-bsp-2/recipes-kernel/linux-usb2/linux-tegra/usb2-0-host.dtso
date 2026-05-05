@@ -1,0 +1,11 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    fragment@0 {
+        target-path = "/bus@0/padctl@3520000/ports/usb2-0";
+        __overlay__ {
+            mode = "host";
+        };
+    };
+};

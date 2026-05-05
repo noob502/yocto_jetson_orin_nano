@@ -1,0 +1,71 @@
+--- a/initrd-flash.sh
++++ b/initrd-flash.sh
+@@ -219,20 +219,56 @@
+ 
+ mount_partition() {
+     local dev="$1"
+-    local mnt=$(cat /proc/mounts | grep "^$dev" | cut -d' ' -f2)
+-    local i=$(echo $mnt|awk -F' ' '{print NF}')
+-    while [ $i -ne 0 ]; do
+-        local mnt=$(echo ${mnt} | cut -d' ' -f$i)
+-		if ! umount "${mnt}" > /dev/null 2>&1; then
+-            echo "ERR: unmount ${mnt} on device $dev failed" >&2
+-            return 1
++    local mnts i out
++
++    # 1) Unmount anything currently mounted from this dev (if any)
++    mnts=$(awk -v d="$dev" '$1==d {print $2}' /proc/mounts)
++    i=$(echo "$mnts" | awk 'NF{print NF; exit}')
++    # Above "i" is not super meaningful; we just unmount all we found
++    if [ -n "$mnts" ]; then
++        # Unmount all mountpoints for this dev
++        while read -r mp; do
++            [ -n "$mp" ] || continue
++            umount "$mp" >/dev/null 2>&1 || true
++        done <<< "$mnts"
++    fi
++
++    # 2) Retry udisksctl mount to avoid DBus timing races
++    #    (this is the OE4T #1350 workaround)
++    for i in $(seq 1 25); do
++        # If it became mounted by any means, return mountpoint
++        mnts=$(awk -v d="$dev" '$1==d {print $2}' /proc/mounts)
++        if [ -n "$mnts" ]; then
++            # Return the first mountpoint
++            echo "$mnts" | head -n1
++            return 0
++        fi
++
++        out=$(udisksctl mount -b "$dev" 2>&1)
++        if [ $? -eq 0 ]; then
++            mnts=$(awk -v d="$dev" '$1==d {print $2}' /proc/mounts)
++            echo "$mnts" | head -n1
++            return 0
+         fi
+-        i=$(expr $i - 1)
++
++        # Accept "already mounted" as success
++        echo "$out" | grep -qi "AlreadyMounted" && {
++            mnts=$(awk -v d="$dev" '$1==d {print $2}' /proc/mounts)
++            echo "$mnts" | head -n1
++            return 0
++        }
++
++        # Known race: udisks hasn't created the DBus object yet
++        echo "$out" | grep -qi "Error looking up object for device" && {
++            sleep 0.5
++            continue
++        }
++
++        # Generic settle + retry
++        sleep 0.5
+     done
+-    if udisksctl mount -b "$dev" > /dev/null; then
+-	cat /proc/mounts | grep "^$dev" | cut -d' ' -f2
+-	return 0
+-    fi
++
++    echo "ERR: could not mount $dev (udisksctl failed after retries)" >&2
+     echo ""
+     return 1
+ }

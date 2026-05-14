@@ -2,6 +2,7 @@
 
 MACHINEOVERRIDES .= ":custom-jon-bb0"
 
-# Common custom MB1 config for this carrier board
-TEGRA_FLASHVAR_PINMUX_CONFIG ?= "tegra234-custom-jon-bb0-pinmux.dtsi"
-TEGRA_FLASHVAR_PMC_CONFIG ?= "tegra234-custom-jon-bb0-padvoltage-default.dtsi"
+TEGRA_PLUGIN_MANAGER_OVERLAYS:append = " tegra234-p3767-camera-p3768-vc_mipi-dual.dtbo"
+
+USE_REDUNDANT_FLASH_LAYOUT_DEFAULT = "1"
+ROOTFSPART_SIZE_REDUNDANT = "10737418240"
